@@ -1,0 +1,280 @@
+<!-- loginSignupPage.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="loginSignupStyle.css">
+    <!-- ... Head content and links ... -->
+    <title>Login/Signup</title>
+    <style>
+/* Global Styles */
+body {
+    font-family: "Comic Sans MS";
+    background-color: #f5e6cc;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    text-align: center;
+}
+
+  /* Header Styles */
+header {
+    background-color: #8cc63e;
+    padding: 20px;
+}
+
+header h1 {
+    color: #fff;
+    margin: 0;
+}
+
+  /* Navigation Styles */
+nav {
+    background-color: #b5d46b;
+    padding: 10px;
+}
+
+nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+nav li {
+    display: inline-block;
+    margin-right: 20px;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+}
+
+  /* Main Content Styles */
+main {
+    padding: 20px;
+}
+
+main h2 {
+    color: #8cc63e;
+}
+
+  /* Footer Styles */
+footer {
+    background-color: #5C4033;
+    padding: 4px;
+    color: #fff;
+    text-align: center;
+}
+
+  /* Farm-Themed Images */
+.farm-img {
+    width: 100%;
+    max-width: 400px;
+    display: block;
+    margin: 20px auto;
+    border: 5px solid #8cc63e;
+    border-radius: 10px;
+}
+
+h1 {
+    text-align: center;
+    margin: 8px;
+}
+
+.main-farm-photo {
+    max-width: 100%;
+    max-height: 100%;
+    width: 400px;
+    height: 300px;
+    border: 5px solid #000; 
+    border-radius: 25px;
+    padding: 0px; 
+}
+
+img {
+    max-width: 100%;
+    max-height: 100%;
+    width: 300px;
+    height: 200px;
+}
+
+.lesson-description {
+    font-size: 15px;
+}
+
+ul {
+    list-style: none;
+    text-align:left;
+}
+
+.lesson-description {
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    margin: 5px;
+}
+
+#lessons {
+    display: inline-block;
+    padding: 10px;
+    border: 4px solid black;
+    border-radius: 25px;
+    margin: 5px;
+    text-align: center;
+    background-color: #a9ba9d;
+}
+
+.main-photos {
+    display: fixed;
+    margin: 5px;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-barn-photo {
+    top: 5rem;
+    left: 2rem;
+    transform: rotate(-10deg);
+}
+
+.main-indoor-ring-photo {
+    transform: rotate(10deg);
+}
+
+/* start of navigation bar style */
+body {
+    margin: 0;
+    font-family: "Comic Sans MS";
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+    
+.navbar {
+    background-color: #5C4033;
+    overflow: hidden;
+}
+    
+.navbar a {
+    float: left;
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+    
+.login-button {
+    float: right;
+}
+
+.navbar a:hover {
+    background-color: #5C4033;
+    color: #77DD77;
+}
+
+/* end of navigation bar style */
+/* start of signup style*/
+hr {
+    border: none; /* Remove the default border */
+    border-style: dotted;
+    border-color: #7d7473;
+    height: 2px; /* Set the height of the line */
+    width: 70%; /* Set the width of the line (percentage or pixels) */
+    margin: 10px auto;
+    background-color: transparent; /* Set the color of the line */
+}
+    /* end of signup style*/
+    /*start of login and signup forms div styles*/
+#login-signup-form {
+    padding: 10px;
+    border: 4px solid black;
+    border-radius: 15px;
+    background-color: #a9ba9d;
+    margin: 4px auto;
+    margin-bottom: 20px;
+    width: 500px;
+    }
+    /*end of login and signup forms div styles*/
+
+h1 {
+    font-family: "Comic Sans MS";
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+input {
+    margin: 2px;
+    border-radius: 4px;
+    height: 30px;
+    font-family: "Comic Sans MS";
+    font-weight: bold;
+    font-size: 14px;
+    color: #241d15;
+    text-align: center;
+}
+
+button {
+    margin: 8px;
+    border-radius: 5px;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    height: 25px;
+    width: 170px;
+    background-color: #5C4033;
+}
+
+footer {
+
+    background-color: #5C4033;
+    padding: 4px;
+    color: #fff;
+    text-align: center;
+    margin-top: 80px;
+}
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <a href="homePage.html">Home</a>
+        <a href="lessonPage.html">Lessons</a>
+        <a class="login-button" href="loginSignupPage.html">SignUp/Login</a>
+        <div id="welcome-message"></div>
+    </div>
+    <h1>Login</h1>
+    <!-- Login Form -->
+    <div id="login-signup-form">
+        <form id="login-form" action="/login" method="post">
+            <input type="text" name="username" placeholder="Username">
+            <input type="password" name="password" placeholder="Password">
+            <button type="submit">Login</button>
+        </form>
+    </div>
+    <h1>Signup</h1>
+    <div id="login-signup-form">
+        <form id="signup-form" action="/signup" method="post">
+            <input type="text" name="username" placeholder="Create Username">
+            <input type="password" name="password" placeholder="Create Password">
+            <hr>
+            <input type="text" name="firstName" placeholder="First Name">
+            <input type="text" name="lastName" placeholder="Last Name">
+            <br>
+            <input type="email" name="email" placeholder="Email">
+            <br>
+            <input type="text" name="homeAddress" placeholder="Home Address">
+            <input type="text" name="cityTown" placeholder="City/Town">
+            <br>
+            <input type="text" name="state" placeholder="State">
+            <input type="text" name="zipCode" placeholder="Zip Code">
+            <br>
+            <button type="submit">Sign Up</button>
+        </form>
+    </div>
+<script src="app.js"></script>
+</body>
+<footer>
+</footer>
+</html>

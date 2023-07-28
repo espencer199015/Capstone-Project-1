@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Dream Ride Stables</title>
+</head>
+<body>
+    <style>
+        /* start of navigation bar style */
+        body {
+            margin: 0;
+            font-family: "Comic Sans MS";
+            font-weight: bold;
+        }
+        
+        .navbar {
+            background-color: #5C4033;
+            overflow: hidden;
+        }
+        
+        .navbar a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+        
+        .navbar a:hover {
+            background-color: #5C4033;
+            color: #77DD77;
+        }
+        /* end of navigation bar style */
+
+        input {
+        margin: 2px;
+        border-radius: 5px;
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+        height: 25px;
+        width: 170px;
+        background-color: #5C4033;
+    }
+/* Global Styles */
+body {
+    font-family: "Comic Sans MS";
+    background-color: #f5e6cc;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    text-align: center;
+}
+
+  /* Header Styles */
+header {
+    background-color: #8cc63e;
+    padding: 20px;
+}
+
+header h1 {
+    color: #fff;
+    margin: 0;
+}
+
+  /* Navigation Styles */
+nav {
+    background-color: #b5d46b;
+    padding: 10px;
+}
+
+nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+nav li {
+    display: inline-block;
+    margin-right: 20px;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+}
+
+  /* Main Content Styles */
+main {
+    padding: 20px;
+}
+
+main h2 {
+    color: #8cc63e;
+}
+
+  /* Footer Styles */
+footer {
+    background-color: #5C4033;
+    padding: 4px;
+    color: #fff;
+    text-align: center;
+}
+
+  /* Farm-Themed Images */
+.farm-img {
+    width: 100%;
+    max-width: 400px;
+    display: block;
+    margin: 20px auto;
+    border: 5px solid #8cc63e;
+    border-radius: 10px;
+}
+
+h1 {
+    text-align: center;
+    margin: 8px;
+}
+
+.main-farm-photo {
+    max-width: 100%;
+    max-height: 100%;
+    width: 400px;
+    height: 300px;
+    border: 5px solid #000; 
+    border-radius: 25px;
+    padding: 0px; 
+}
+
+img {
+    max-width: 100%;
+    max-height: 100%;
+    width: 300px;
+    height: 200px;
+}
+
+.lesson-description {
+    font-size: 15px;
+}
+
+ul {
+    list-style: none;
+    text-align:left;
+}
+
+.lesson-description {
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    margin: 5px;
+}
+
+#lessons {
+    display: inline-block;
+    padding: 10px;
+    border: 4px solid black;
+    border-radius: 25px;
+    margin: 5px;
+    text-align: center;
+    background-color: #a9ba9d;
+}
+
+.main-photos {
+    display: fixed;
+    margin: 5px;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-barn-photo {
+    top: 5rem;
+    left: 2rem;
+    transform: rotate(-10deg);
+}
+
+.main-indoor-ring-photo {
+    transform: rotate(10deg);
+}
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <a href="homePage.html">Home</a>
+        <a href="lessonPage.html">Lessons</a>
+        <a class="login-button" href="loginSignupPage.html">SignUp/Login</a>
+        <div id="welcome-message"></div>
+    </div>
+    <h1>Lessons</h1>
+    <div class="lesson-description">
+    <div id="lessons" class="beginner-lessons">
+        <h1>Beginner Lessons</h1>
+    <img class="beg-lesson-photo" src="https://i0.wp.com/shop.odanielhonda.com/wp-content/uploads/sites/92/2023/01/iStock-1408512831.jpg?ssl=1" 
+    alt="Beginner Riding Photo">
+    <p>Skills Taught:
+        <ul>
+            <li>Basic Barn Chores (stall cleaning, grooming supply storage and tack storage)</li>
+            <li>Grooming</li>
+            <li>Tacking and Untacking Horse</li>
+            <li>Beginning Groundwork (leading at walk and trot, stopping and backing up)</li>
+            <li>Mounting and Dismounting</li>
+            <li>Walking, Turning, Stopping and Reversing</li>
+            <li>Trotting (seated and posting)</li>
+            <li>Jumping Position in saddle</li>
+            <li>Pole work (walk and trot)</li>
+        </ul>
+    </p>
+    <input type="submit" value="SELECT">
+    </div>
+    <div id ="lessons" class="intermediate-lessons">
+        <h1>Intermediate Lessons</h1>
+    <img class="int-lesson-photo" src="https://horsej.b-cdn.net/files/2018/shutterstock_1320886733_-_rolf_dannenberg_-_web.jpg" 
+    alt="Intermediate Riding Photo">
+    <p>Pre-requisites: 
+        <ul>
+        <li>Mastery of Beginner Level Skills</li>
+        <li>Completion and Passing of Riding Skill Level Test</li>
+        </ul>
+    </p>
+    <p>Skills Taught:
+    <ul>
+            <li>Bathing</li>
+            <li>Mane Pulling and Leg Wrapping</li>
+            <li>Trailer Loading and Unloading</li>
+            <li>Intermediate Groundwork (lunging at walk and trot)</li>
+            <li>Cantering</li>
+            <li>Pole Work (walk, trot, canter)</li>
+            <li>First jumps</li>
+            <li>Simple jump course (max. 4 jumps)</li>
+        </ul>
+    </p>
+    <input type="submit" value="SELECT">
+    </div>
+    <div id ="lessons" class="advanced-lessons">
+        <h1>Advanced Lessons</h1>
+    <img class="adv-lesson-photo" src="https://www.horseillustrated.com/wp-content/uploads/2018/04/hunt-seat-equitation-1280x720.jpg" 
+    alt="Advanced Riding Photo">
+    <p>Pre-requisites: 
+        <ul>
+        <li>Mastery of Beginner and Intermediate Level Skills</li>
+        <li>Completion and Passing of Riding Skill Level Test</li>
+        </ul>
+    </p>
+    <p>Skills Taught:
+    <ul>
+            <li>Horse Feeding Schedules and Supplements</li>
+            <li>Show Prepping</li>
+            <li>Illness and Ailment Identification</li>
+            <li>Advanced Groundwork (lunging at canter, over ground poles and jumps)</li>
+            <li>Galloping</li>
+            <li>Full Jumping Courses</li>
+            <li>First Competitions</li>
+        </ul>
+    </p>
+    <input type="submit" value="SELECT">
+    </div>
+</div>
+<script src="app.js"></script>
+</body>
+<footer>
+</footer>
+</html>
