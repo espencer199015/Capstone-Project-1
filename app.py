@@ -1,6 +1,4 @@
-# app.py
-
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -21,9 +19,17 @@ class User(db.Model):
     zip_code = db.Column(db.String(10), nullable=False)
 
 # Create the database table
-db.create_all()
+def create_db():
+    db.create_all()
+    print("Database tables created")
 
-# app.py
+@app.route('/')
+def home():
+    return "Hello, World!"
+
+@app.route('/userAccountPage')
+def user_account_page():
+    return render_template('userAccountPage.html')
 
 @app.route('/signup', methods=['POST'])
 def signup():
@@ -42,7 +48,8 @@ def signup():
     existing_email = User.query.filter_by(email=email).first()
 
     if existing_user or existing_email:
-        return "Username or Email already exists. Please choose a different one."
+        response_data = {"success": False, "message": "Username or Email already exists. Please choose a different one."}
+        return jsonify(response_data), 400
 
     new_user = User(
         username=username,
@@ -60,7 +67,8 @@ def signup():
     db.session.commit()
 
     # Redirect the user to the login page after signup
-    return redirect(url_for('login'))
+    response_data = {"success": True, "message": "Signup successful"}
+    return jsonify(response_data), 200
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -76,8 +84,6 @@ def login():
     # For simplicity, let's just return a success message.
     return "Login successful!"
 
-# app.py
-
 @app.route('/account')
 def account():
     # Here, you need to implement user authentication logic.
@@ -92,3 +98,6 @@ def account():
         return "User not found."
 
     return render_template('accountPage.html', user=user)
+
+if __name__ == '__main__':
+    app.run(debug=True)
