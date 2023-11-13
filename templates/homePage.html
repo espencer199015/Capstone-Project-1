@@ -4,46 +4,47 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="loginSignupStyle.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='loginSignupStyle.css') }}">
     <title>Dream Ride Stables</title>
 </head>
 <body>
-</head>
-<body>
     <!-- Navigation Bar -->
-    <div class="navbar">
-        <a href="homePage.html">Home</a>
-        <a href="lessonPage.html">Lessons</a>
-        <a class="login-button" href="loginSignupPage.html">SignUp/Login</a>
-        <div id="welcome-message"></div>
-    </div>
+<nav>
+    <ul>
+        <li><a href="{{ url_for('home') }}">Home</a></li>
+        <li><a href="{{ url_for('lesson_page') }}">Lessons</a></li>
+        {% if user_authenticated %}
+            <li><a href="{{ url_for('user_account_page') }}">User Account</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('login_signup_page') }}">Login/Signup</a></li>
+    </ul>
+</nav>
 
-    </div>
-
-    <!--Page Content -->
+    <!-- Page Content -->
     <h1>Dream Ride Stables</h1>
     <div class="main-photos">
-    <img class="main-barn-photo" src="https://banddbuilders.com/wp-content/uploads/2019/07/b-and-d-builders-vassallo-horse-barn-facility-12.jpg" 
-    alt="Farm Photo">
-    <img class="main-farm-photo" src="https://www.visitmaryland.org/sites/default/files/styles/hero_medium/public/2020-09/Valley-Meadow-Farm-1190-793.jpg?itok=Gk-iLwBw" 
-    alt="Farm Photo">
-    <img class="main-indoor-ring-photo" src="https://i0.wp.com/stablestyle.net/wp-content/uploads/2017/12/inside-the-riding-arena.jpg?resize=650%2C433&ssl=1" 
-    alt="Farm Photo">
+        <img class="main-barn-photo" src="https://banddbuilders.com/wp-content/uploads/2019/07/b-and-d-builders-vassallo-horse-barn-facility-12.jpg" 
+        alt="Farm Photo">
+        <img class "main-farm-photo" src="https://www.visitmaryland.org/sites/default/files/styles/hero_medium/public/2020-09/Valley-Meadow-Farm-1190-793.jpg?itok=Gk-iLwBw" 
+        alt="Farm Photo">
+        <img class="main-indoor-ring-photo" src="https://i0.wp.com/stablestyle.net/wp-content/uploads/2017/12/inside-the-riding-arena.jpg?resize=650%2C433&ssl=1" 
+        alt="Farm Photo">
     </div>
     <br>
     <h2>About the Farm</h2>
-    <p> Dream ride stables is a 200 acre farm with 30 lesson horses.
+    <p>Dream Ride Stables is a 200-acre farm with 30 lesson horses.
         <br>We have 4 fantastic riding instructors! 
         <br>Ms. Roxanne and Ms. Pat are here for all our beginner riders of all ages.
         <br>Ms. Jay and Mr. Trent are here for all riders ready to take their riding to the next level and out into the show ring.
         <br>This farm offers hunt-seat and western riding for all levels of riders.
-        <br>The facilities include 2 barns, 2 indoor rings and 4 outdoor rings. 
-        <br>The farm also provides 50 acres of wooded trails and hill-work.
+        <br>The facilities include 2 barns, 2 indoor rings, and 4 outdoor rings. 
+        <br>The farm also provides 50 acres of wooded trails and hill work.
         <br>We offer trail riding groups on specified weekend dates.
         <br>Check the website often for farm and riding event updates.
         <br>Happy trails from Dream Ride Stables!
-    <script src="app.js"></script>
+    </p>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 <footer>
 </footer>

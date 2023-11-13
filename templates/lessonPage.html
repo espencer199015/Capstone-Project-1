@@ -4,42 +4,47 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="loginSignupStyle.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='loginSignupStyle.css') }}">
     <title>Dream Ride Stables</title>
 </head>
 <body>
-</head>
-<body>
     <!-- Navigation Bar -->
-    <div class="navbar">
-        <a href="homePage.html">Home</a>
-        <a href="lessonPage.html">Lessons</a>
-        <a class="login-button" href="loginSignupPage.html">SignUp/Login</a>
-        <div id="welcome-message"></div>
-    </div>
+<nav>
+    <ul>
+        <li><a href="{{ url_for('home') }}">Home</a></li>
+        <li><a href="{{ url_for('lesson_page') }}">Lessons</a></li>
+        {% if user_authenticated %}
+            <li><a href="{{ url_for('user_account_page') }}">User Account</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('login_signup_page') }}">Login/Signup</a></li>
+    </ul>
+</nav>
+    <div id="welcome-message"></div>
+
     <h1>Lessons</h1>
     <div class="lesson-description">
-    <div id="lessons" class="beginner-lessons">
-        <h1>Beginner Lessons</h1>
-    <img class="beg-lesson-photo" src="https://i0.wp.com/shop.odanielhonda.com/wp-content/uploads/sites/92/2023/01/iStock-1408512831.jpg?ssl=1" 
-    alt="Beginner Riding Photo">
-    <p>Skills Taught:
-        <ul>
-            <li>Basic Barn Chores (stall cleaning, grooming supply storage and tack storage)</li>
-            <li>Grooming</li>
-            <li>Tacking and Untacking Horse</li>
-            <li>Beginning Groundwork (leading at walk and trot, stopping and backing up)</li>
-            <li>Mounting and Dismounting</li>
-            <li>Walking, Turning, Stopping and Reversing</li>
-            <li>Trotting (seated and posting)</li>
-            <li>Jumping Position in saddle</li>
-            <li>Pole work (walk and trot)</li>
-        </ul>
-    </p>
-    <input type="submit" value="SELECT">
-    </div>
-    <div id ="lessons" class="intermediate-lessons">
+        <div class="lessons beginner-lessons">
+            <h2>Beginner Lessons</h2>
+            <img class="beg-lesson-photo" src="https://i0.wp.com/shop.odanielhonda.com/wp-content/uploads/sites/92/2023/01/iStock-1408512831.jpg?ssl=1" 
+            alt="Beginner Riding Photo">
+            <p>Skills Taught:</p>
+            <ul>
+                <li>Basic Barn Chores (stall cleaning, grooming supply storage, and tack storage)</li>
+                <li>Grooming</li>
+                <li>Tacking and Untacking Horse</li>
+                <li>Beginning Groundwork (leading at walk and trot, stopping and backing up)</li>
+                <li>Mounting and Dismounting</li>
+                <li>Walking, Turning, Stopping, and Reversing</li>
+                <li>Trotting (seated and posting)</li>
+                <li>Jumping Position in the saddle</li>
+                <li>Pole work (walk and trot)</li>
+            </ul>
+            <form action="/select" method="post">
+                <input type="submit" value="SELECT">
+            </form>
+        </div>
+ <div class="lessons intermediate-lessons">
         <h1>Intermediate Lessons</h1>
     <img class="int-lesson-photo" src="https://horsej.b-cdn.net/files/2018/shutterstock_1320886733_-_rolf_dannenberg_-_web.jpg" 
     alt="Intermediate Riding Photo">
@@ -63,7 +68,7 @@
     </p>
     <input type="submit" value="SELECT">
     </div>
-    <div id ="lessons" class="advanced-lessons">
+    <div class="lessons advanced-lessons">
         <h1>Advanced Lessons</h1>
     <img class="adv-lesson-photo" src="https://www.horseillustrated.com/wp-content/uploads/2018/04/hunt-seat-equitation-1280x720.jpg" 
     alt="Advanced Riding Photo">
@@ -86,8 +91,7 @@
     </p>
     <input type="submit" value="SELECT">
     </div>
-</div>
-<script src="app.js"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 <footer>
 </footer>

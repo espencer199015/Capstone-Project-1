@@ -21,8 +21,13 @@ header h1 {
 
   /* Navigation Styles */
 nav {
-    background-color: #b5d46b;
+    background-color: #5C4033;
     padding: 10px;
+}
+
+nav a:hover {
+    color: #9fe444; /* Change to the desired color when hovered */
+    transition: color 0.3s ease; /* Optional: add a smooth transition effect */
 }
 
 nav ul {
@@ -90,23 +95,35 @@ img {
     height: 200px;
 }
 
-.lesson-description {
-    font-size: 15px;
-}
-
 ul {
     list-style: none;
     text-align:left;
 }
 
 .lesson-description {
+    font-size: 15px;
     display:flex;
     justify-content: center;
     align-items: center;
     margin: 5px;
 }
 
-#lessons {
+/* Add this styling for lesson sections */
+.beginner-lessons,
+.intermediate-lessons,
+.advanced-lessons {
+    font-family:sans-serif;
+    display: inline-block;
+    padding: 10px;
+    border: 4px solid black;
+    border-radius: 25px;
+    margin: 5px;
+    text-align: center;
+    background-color: #a9ba9d;
+}
+
+/* Keep the existing styling for the "lessons" class if needed elsewhere */
+.lessons {
     display: inline-block;
     padding: 10px;
     border: 4px solid black;
@@ -117,7 +134,7 @@ ul {
 }
 
 .main-photos {
-    display: fixed;
+    display: flex;
     margin: 5px;
     text-align: center;
     align-items: center;

@@ -1,8 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'  # Change the database URI as needed
+app = Flask(__name__, static_folder='static', static_url_path='/static')
+
+# Configure your PostgreSQL database settings here
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://elizabetherlandson1:newpassword@localhost/capstoneproject1'
+
 db = SQLAlchemy(app)
 
 # Define the User model
@@ -20,84 +23,81 @@ class User(db.Model):
 
 # Create the database table
 def create_db():
-    db.create_all()
-    print("Database tables created")
+    with app.app_context():
+        db.create_all()
+        print("Database tables created")
+
+# Create the tables before running the app
+create_db()
 
 @app.route('/')
 def home():
-    return "Hello, World!"
+    return render_template('homePage.html')
 
-@app.route('/userAccountPage')
+@app.route('/home')
+def home_page():
+    return render_template('homePage.html')
+
+@app.route('/lessonPage')
+def lesson_page():
+    return render_template('lessonPage.html')
+
+@app.route('/loginSignupPage')
+def login_signup_page():
+    return render_template('loginSignupPage.html')        
+
+@app.route('/user_account_page')
 def user_account_page():
     return render_template('userAccountPage.html')
 
 @app.route('/signup', methods=['POST'])
 def signup():
-    username = request.form['username']
-    password = request.form['password']
-    first_name = request.form['firstName']
-    last_name = request.form['lastName']
-    email = request.form['email']
-    home_address = request.form['homeAddress']
-    city_town = request.form['cityTown']
-    state = request.form['state']
-    zip_code = request.form['zipCode']
+    try:
+        # Validate that required fields are present in the form data
+        required_fields = ['username', 'password', 'first_name', 'last_name', 'email', 'home_address', 'city_town', 'state', 'zip_code']
+        if not all(field in request.form for field in required_fields):
+            return jsonify({'success': False, 'message': 'Missing required fields'}), 400
 
-    # Check if the username or email already exists in the database
-    existing_user = User.query.filter_by(username=username).first()
-    existing_email = User.query.filter_by(email=email).first()
+        # Your signup code here
+        # Assuming you have a user object created, for example:
+        new_user = User(
+            username=request.form['username'],
+            password=request.form['password'],
+            first_name=request.form['first_name'],
+            last_name=request.form['last_name'],
+            email=request.form['email'],
+            home_address=request.form['home_address'],
+            city_town=request.form['city_town'],
+            state=request.form['state'],
+            zip_code=request.form['zip_code']
+        )
+        # Add the new user to the database
+        db.session.add(new_user)
+        db.session.commit()
 
-    if existing_user or existing_email:
-        response_data = {"success": False, "message": "Username or Email already exists. Please choose a different one."}
-        return jsonify(response_data), 400
+        # After successful signup, set user_authenticated to True
+        user_authenticated = True
+        return jsonify({'success': True, 'message': 'Signup successful', 'user_authenticated': user_authenticated, 'user': new_user})
 
-    new_user = User(
-        username=username,
-        password=password,
-        first_name=first_name,
-        last_name=last_name,
-        email=email,
-        home_address=home_address,
-        city_town=city_town,
-        state=state,
-        zip_code=zip_code
-    )
-
-    db.session.add(new_user)
-    db.session.commit()
-
-    # Redirect the user to the login page after signup
-    response_data = {"success": True, "message": "Signup successful"}
-    return jsonify(response_data), 200
+    except Exception as e:
+        print(f"Error in signup route: {e}")
+        return jsonify({'success': False, 'message': 'Internal Server Error'}), 500
 
 @app.route('/login', methods=['POST'])
 def login():
+    # Your login code here
     username = request.form['username']
     password = request.form['password']
 
-    user = User.query.filter_by(username=username).first()
+    # Assuming you have a function to retrieve user details based on the login credentials
+    user = User.query.filter_by(username=username, password=password).first()
 
-    if not user or user.password != password:
-        return "Invalid credentials. Please try again."
-
-    # Here, you can store the logged-in user information in a session, or use any other authentication method.
-    # For simplicity, let's just return a success message.
-    return "Login successful!"
-
-@app.route('/account')
-def account():
-    # Here, you need to implement user authentication logic.
-    # For simplicity, let's assume the user is logged in and authenticated.
-    # You can use session management or JWT tokens for a more secure implementation.
-
-    # Fetch the user details from the database (replace 'current_username' with the authenticated user's username)
-    current_username = 'example_username'
-    user = User.query.filter_by(username=current_username).first()
-
-    if not user:
-        return "User not found."
-
-    return render_template('accountPage.html', user=user)
+    if user:
+        # After successful login, set user_authenticated to True
+        user_authenticated = True
+        return jsonify({'success': True, 'message': 'Login successful', 'user_authenticated': user_authenticated, 'user': user})
+    else:
+        return jsonify({'success': False, 'message': 'Invalid credentials. Please try again.'}), 400
 
 if __name__ == '__main__':
     app.run(debug=True)

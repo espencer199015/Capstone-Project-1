@@ -1,108 +1,58 @@
-<!-- accountPage.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="loginSignupStyle.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='loginSignupStyle.css') }}">
     <title>User Account</title>
-    <style>
-           /* start of navigation bar style */
-        body {
-            margin: 0;
-            font-family: "Comic Sans MS";
-            font-weight: bold;
-            text-align: center;
-            background-color: #d1c8a9;
-        }
-        
-        .navbar {
-            background-color: #5C4033;
-            overflow: hidden;
-        }
-        
-        .navbar a {
-            float: left;
-            display: block;
-            color: white;
-            text-align: center;
-            padding: 14px 16px;
-            text-decoration: none;
-        }
-        
-        .login-button {
-            float: right;
-        }
-        .navbar a:hover {
-            background-color: #5C4033;
-            color: #77DD77;
-        }
-        /* end of navigation bar style */
-         /* Main Content Styles */
-main {
-    padding: 20px;
-}
-
-main h2 {
-    color: #8cc63e;
-}
-
-  /* Footer Styles */
-footer {
-    background-color: #5C4033;
-    padding: 4px;
-    color: #fff;
-    text-align: center;
-}
-
-#view-cart {
-    background-color: #77DD77;
-    border-radius: 12px;
-    font-size: 20px;
-    font-weight: bold;
-}
-
-div #account-details {
-    border: 4px solid black;
-}
-
-div #transaction-history {
-    border: 4px solid black;
-}
-
-    </style>
 </head>
 <body>
     <!-- Navigation Bar -->
-    <div class="navbar">
-        <a href="homePage.html">Home</a>
-        <a href="lessonPage.html">Lessons</a>
-        <a class="login-button" href="loginSignupPage.html">SignUp/Login</a>
-        <div id="welcome-message"></div>
-    </div>
+    <nav>
+    <ul>
+        <li><a href="{{ url_for('home') }}">Home</a></li>
+        <li><a href="{{ url_for('lesson_page') }}">Lessons</a></li>
+        {% if user_authenticated %}
+            <li><a href="{{ url_for('user_account_page') }}">User Account</a></li>
+        {% endif %}
+        <li><a href="{{ url_for('login_signup_page') }}">Login/Signup</a></li>
+    </ul>
+</nav>
 
     <!-- User Account Details -->
     <div id="account-details">
-    <h1>User Account Details</h1>
+        <h1>User Account Details</h1>
+        {% if user_authenticated %}
+        <label for="username">Username:</label>
         <p id="username"></p>
+        <label for="email">Email:</label>
         <p id="email"></p>
+        <label for="firstName">First Name:</label>
         <p id="firstName"></p>
+        <label for="lastName">Last Name:</label>
         <p id="lastName"></p>
+        <label for="homeAddress">Home Address:</label>
         <p id="homeAddress"></p>
+        <label for="cityTown">City/Town:</label>
         <p id="cityTown"></p>
+        <label for="state">State:</label>
         <p id="state"></p>
+        <label for="zipCode">Zip Code:</label>
         <p id="zipCode"></p>
+        {% else %}
+        <p>User not authenticated.</p>
+    {% endif %}
     </div>
 
     <button id="view-cart">View Cart</button>
 
     <!-- Transaction History -->
     <div id="transaction-history">
-    <h1>Transaction History</h1>
+        <h1>Transaction History</h1>
     </div>
-    <script src="app.js"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 <footer>
 </footer>
