@@ -1,15 +1,19 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+
+# Initialize Square client
+client = square.client.Client(
+    access_token='YOUR_ACCESS_TOKEN',
+    environment='sandbox',  # Change to 'production' for live environment
+)
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
-
-# Configure your PostgreSQL database settings here
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://elizabetherlandson1:newpassword@localhost/capstoneproject1'
-
 db = SQLAlchemy(app)
 
 # Define the User model
-class User(db.Model):
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
@@ -21,18 +25,27 @@ class User(db.Model):
     state = db.Column(db.String(50), nullable=False)
     zip_code = db.Column(db.String(10), nullable=False)
 
+def is_active(self):
+        return True 
+
 # Create the database table
 def create_db():
     with app.app_context():
         db.create_all()
         print("Database tables created")
 
-# Create the tables before running the app
 create_db()
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 @app.route('/')
 def home():
-    return render_template('homePage.html')
+    return render_template('userAccountPage.html')
 
 @app.route('/home')
 def home_page():
@@ -46,8 +59,8 @@ def lesson_page():
 def login_signup_page():
     return render_template('loginSignupPage.html')        
 
-@app.route('/user_account_page')
-def user_account_page():
+@app.route('/account')
+def account_page():
     return render_template('userAccountPage.html')
 
 @app.route('/signup', methods=['POST'])
@@ -58,7 +71,6 @@ def signup():
         if not all(field in request.form for field in required_fields):
             return jsonify({'success': False, 'message': 'Missing required fields'}), 400
 
-        # Your signup code here
         # Assuming you have a user object created, for example:
         new_user = User(
             username=request.form['username'],
@@ -81,23 +93,125 @@ def signup():
 
     except Exception as e:
         print(f"Error in signup route: {e}")
+        # Log the error for debugging purposes
+        # You can also return a more specific error message or status code based on the type of exception
         return jsonify({'success': False, 'message': 'Internal Server Error'}), 500
 
 @app.route('/login', methods=['POST'])
 def login():
-    # Your login code here
-    username = request.form['username']
-    password = request.form['password']
+    try:
+        # Retrieve username and password from the login form data
+        username = request.form['username']
+        password = request.form['password']
 
-    # Assuming you have a function to retrieve user details based on the login credentials
-    user = User.query.filter_by(username=username, password=password).first()
+        # Assuming you have a function to retrieve user details based on the login credentials
+        user = User.query.filter_by(username=username, password=password).first()
 
-    if user:
-        # After successful login, set user_authenticated to True
-        user_authenticated = True
-        return jsonify({'success': True, 'message': 'Login successful', 'user_authenticated': user_authenticated, 'user': user})
+        if user:
+            # After successful login
+            login_user(user)  # Log in the user
+            session['user_authenticated'] = True
+            session['current_user'] = user  # Store user details in session
+            return jsonify({'success': True, 'message': 'Login successful'})
+        else:
+            return jsonify({'success': False, 'message': 'Invalid credentials. Please try again.'}), 401  # Unauthorized status code
+
+    except Exception as e:
+        print(f"Error during login: {e}")
+        # Log the error for debugging purposes
+        # Return a more specific error message or status code based on the type of exception
+        return jsonify({'success': False, 'message': 'Internal Server Error'}), 500
+
+# Example route for login success redirect
+@app.route('/login_success_redirect')
+def login_success_redirect():
+    # Check if a redirect URL is stored in the session
+    redirect_url = session.get('redirect_url', None)
+    
+    if redirect_url:
+        # Redirect to the intended URL after successful login/signup
+        return redirect(redirect_url)
     else:
-        return jsonify({'success': False, 'message': 'Invalid credentials. Please try again.'}), 400
+        # If no redirect URL is stored, go to the home page
+        return redirect(url_for('home'))
+
+@app.route('/select_lesson', methods=['POST'])
+def select_lesson():
+    if not session.get('user_authenticated'):
+        return redirect(url_for('login_signup_page'))  # Redirect non-authenticated users
+
+    lesson_name = request.form['lesson_name']
+    lesson_price = request.form['lesson_price']
+
+    # Add the lesson to the user's session cart
+    if 'cart' not in session:
+        session['cart'] = []
+
+    session['cart'].append({'lesson_name': lesson_name, 'lesson_price': lesson_price})
+    return jsonify({'success': True, 'message': 'Lesson added to cart'})
+
+@app.route('/remove_lesson', methods=['POST'])
+def remove_lesson():
+    if not session.get('user_authenticated'):
+        return redirect(url_for('login_signup_page'))  # Redirect non-authenticated users
+
+    lesson_name = request.form['lesson_name']
+
+    # Remove the lesson from the session cart
+    if 'cart' in session:
+        session['cart'] = [lesson for lesson in session['cart'] if lesson['lesson_name'] != lesson_name]
+
+    return jsonify({'success': True, 'message': 'Lesson removed from cart'})
+
+@app.route('/user_account_page')
+@login_required
+def user_account_page():
+    return render_template('userAccountPage.html')
+
+@app.route('/logout', methods=['POST'])
+@login_required
+def logout():
+    logout_user()  # Log out the user
+    # Clear session data
+    session.pop('user_authenticated', None)
+    session.pop('current_user', None)
+    return redirect(url_for('home'))
+
+# Change one of the select_lesson functions to select_lesson_remove
+@app.route('/select_lesson_remove', methods=['POST'])
+def select_lesson_remove():
+    if not session.get('user_authenticated'):
+        return redirect(url_for('login_signup_page'))  # Redirect non-authenticated users
+
+    lesson_name = request.form['lesson_name']
+
+    # Remove the lesson from the session cart
+    if 'cart' in session:
+        session['cart'] = [lesson for lesson in session['cart'] if lesson['lesson_name'] != lesson_name]
+
+    return jsonify({'success': True, 'message': 'Lesson removed from cart'})
+
+import square.client
+
+# Initialize Square client
+client = square.client.Client(
+    access_token='EAAAEWEnCPPvWSfUzHKnjsPOxH450cPLT759HXBrVNNSwNl_mKq6cS_FE94SbReY',
+    environment='production',  # Change to 'production' for live environment
+)
+
+@app.route('/get_payments', methods=['GET'])
+def get_payments():
+    try:
+        # Retrieve payments
+        result = client.payments.list_payments()
+
+        if result.is_success():
+            return jsonify({'success': True, 'payments': result.body})
+        elif result.is_error():
+            return jsonify({'success': False, 'error': result.errors}), 500
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

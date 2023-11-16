@@ -12,12 +12,13 @@
     <!-- Navigation Bar -->
 <nav>
     <ul>
-        <li><a href="{{ url_for('home') }}">Home</a></li>
+     <li><a href="{{ url_for('home') }}">Home</a></li>
         <li><a href="{{ url_for('lesson_page') }}">Lessons</a></li>
         {% if user_authenticated %}
-            <li><a href="{{ url_for('user_account_page') }}">User Account</a></li>
+            <li><a href="{{ url_for('user_account_page') }}">Howdy, {{ current_user.username }}!</a></li>
+        {% else %}
+            <li><a href="{{ url_for('login_signup_page') }}">Login/Signup</a></li>
         {% endif %}
-        <li><a href="{{ url_for('login_signup_page') }}">Login/Signup</a></li>
     </ul>
 </nav>
     <div id="welcome-message"></div>
@@ -40,9 +41,14 @@
                 <li>Jumping Position in the saddle</li>
                 <li>Pole work (walk and trot)</li>
             </ul>
-            <form action="/select" method="post">
-                <input type="submit" value="SELECT">
-            </form>
+           <form action="/select_lesson" method="post">
+    <input type="hidden" name="lesson_name" value="Beginner Lesson"> <!-- lesson type -->
+    <input type="hidden" name="lesson_price" value="25"> <!-- price -->
+    <input type="submit" value="SELECT">
+    <input type="hidden" name="additional_link" value="https://square.link/u/p6Hb9Ke6?src=embed">
+</form>
+<!-- Repeat the above form for each lesson with appropriate details -->
+
         </div>
  <div class="lessons intermediate-lessons">
         <h1>Intermediate Lessons</h1>
@@ -66,7 +72,12 @@
             <li>Simple jump course (max. 4 jumps)</li>
         </ul>
     </p>
+    <form action="/select_lesson" method="post">
+    <input type="hidden" name="lesson_name" value="Intermediate Lesson"> <!-- lesson type -->
+    <input type="hidden" name="lesson_price" value="35"> <!-- price -->
     <input type="submit" value="SELECT">
+    <input type="hidden" name="additional_link" value="https://square.link/u/psASKmsa?src=embed">
+</form>
     </div>
     <div class="lessons advanced-lessons">
         <h1>Advanced Lessons</h1>
@@ -89,10 +100,15 @@
             <li>First Competitions</li>
         </ul>
     </p>
+    <form action="/select_lesson" method="post">
+    <input type="hidden" name="lesson_name" value="Advanced Lesson"> <!-- lesson type -->
+    <input type="hidden" name="lesson_price" value="45"> <!-- price -->
     <input type="submit" value="SELECT">
+    <input type="hidden" name="additional_link" value="https://square.link/u/re6F2iJr?src=embed">
+</form>
     </div>
     <script src="{{ url_for('static', filename='app.js') }}"></script>
-</body>
 <footer>
 </footer>
+</body>
 </html>

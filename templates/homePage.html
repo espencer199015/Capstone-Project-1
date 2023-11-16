@@ -12,12 +12,13 @@
     <!-- Navigation Bar -->
 <nav>
     <ul>
-        <li><a href="{{ url_for('home') }}">Home</a></li>
+  <li><a href="{{ url_for('home') }}">Home</a></li>
         <li><a href="{{ url_for('lesson_page') }}">Lessons</a></li>
         {% if user_authenticated %}
-            <li><a href="{{ url_for('user_account_page') }}">User Account</a></li>
+            <li><a href="{{ url_for('user_account_page') }}">Howdy, {{ current_user.username }}!</a></li>
+        {% else %}
+            <li><a href="{{ url_for('login_signup_page') }}">Login/Signup</a></li>
         {% endif %}
-        <li><a href="{{ url_for('login_signup_page') }}">Login/Signup</a></li>
     </ul>
 </nav>
 
@@ -45,7 +46,7 @@
         <br>Happy trails from Dream Ride Stables!
     </p>
     <script src="{{ url_for('static', filename='app.js') }}"></script>
-</body>
 <footer>
 </footer>
+</body>
 </html>
