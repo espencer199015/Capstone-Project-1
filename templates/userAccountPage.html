@@ -45,7 +45,7 @@
         <p id="state"></p>
         <label for="zipCode">Zip Code:</label>
         <p id="zipCode"></p>
-        {% else %}
+    {% else %}
         <p>User not authenticated.</p>
     {% endif %}
     </div>
@@ -55,6 +55,7 @@
     <div class="modal-content">
         <!-- Your edit form -->
         <h2>Edit Account Information</h2>
+        {% if user_authenticated %}
         <form id="edit-form">
             <!-- Input fields for editing user info -->
             <label for="edit-username">Username:</label>

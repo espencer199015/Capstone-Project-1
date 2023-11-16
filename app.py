@@ -1,16 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-
-# Initialize Square client
-client = square.client.Client(
-    access_token='YOUR_ACCESS_TOKEN',
-    environment='sandbox',  # Change to 'production' for live environment
-)
+from square.client import Client
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://elizabetherlandson1:newpassword@localhost/capstoneproject1'
 db = SQLAlchemy(app)
+access_token = "EAAAEJY2g4oGGzqP3J92OmmnFb8121A5E-XhpaxuNwb5SFdigzdDv574UA0OXvJY"
+client = Client(access_token=access_token)
 
 # Define the User model
 class User(UserMixin, db.Model):
@@ -45,7 +42,7 @@ def load_user(user_id):
 
 @app.route('/')
 def home():
-    return render_template('userAccountPage.html')
+    return render_template('homePage.html')
 
 @app.route('/home')
 def home_page():
@@ -190,14 +187,6 @@ def select_lesson_remove():
         session['cart'] = [lesson for lesson in session['cart'] if lesson['lesson_name'] != lesson_name]
 
     return jsonify({'success': True, 'message': 'Lesson removed from cart'})
-
-import square.client
-
-# Initialize Square client
-client = square.client.Client(
-    access_token='EAAAEWEnCPPvWSfUzHKnjsPOxH450cPLT759HXBrVNNSwNl_mKq6cS_FE94SbReY',
-    environment='production',  # Change to 'production' for live environment
-)
 
 @app.route('/get_payments', methods=['GET'])
 def get_payments():
