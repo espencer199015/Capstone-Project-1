@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log('Signup Result:', result);
 
                 if (result.success) {
-                    window.location.href = '/userAccountPage.html';
+                    window.location.href = '/user_account_page';
                 } else {
                     if (result.message === 'Missing required fields') {
                         alert('Please fill in all required fields.');

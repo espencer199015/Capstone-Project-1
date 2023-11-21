@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, s
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from square.client import Client
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://elizabetherlandson1:newpassword@localhost/capstoneproject1'
@@ -9,6 +10,11 @@ db = SQLAlchemy(app)
 access_token = "EAAAEJY2g4oGGzqP3J92OmmnFb8121A5E-XhpaxuNwb5SFdigzdDv574UA0OXvJY"
 client = Client(access_token=access_token)
 
+# Create the database table
+def create_db():
+        with app.app_context():
+            db.create_all()
+            print("Database tables created")
 # Define the User model
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -22,16 +28,14 @@ class User(UserMixin, db.Model):
     state = db.Column(db.String(50), nullable=False)
     zip_code = db.Column(db.String(10), nullable=False)
 
-def is_active(self):
+    def is_active(self):
         return True 
 
-# Create the database table
-def create_db():
-    with app.app_context():
-        db.create_all()
-        print("Database tables created")
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
 
-create_db()
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -56,8 +60,14 @@ def lesson_page():
 def login_signup_page():
     return render_template('loginSignupPage.html')        
 
-@app.route('/account')
-def account_page():
+@app.route('/user_account_page')
+@login_required
+def user_account_page():
+    return render_template('userAccountPage.html')
+
+@app.route('/user_account_page_new')  # Renamed route to avoid duplication
+@login_required
+def user_account_page_new():
     return render_template('userAccountPage.html')
 
 @app.route('/signup', methods=['POST'])
@@ -68,10 +78,8 @@ def signup():
         if not all(field in request.form for field in required_fields):
             return jsonify({'success': False, 'message': 'Missing required fields'}), 400
 
-        # Assuming you have a user object created, for example:
         new_user = User(
             username=request.form['username'],
-            password=request.form['password'],
             first_name=request.form['first_name'],
             last_name=request.form['last_name'],
             email=request.form['email'],
@@ -80,43 +88,37 @@ def signup():
             state=request.form['state'],
             zip_code=request.form['zip_code']
         )
-        # Add the new user to the database
+        new_user.set_password(request.form['password'])  # Set hashed password
+
         db.session.add(new_user)
         db.session.commit()
 
-        # After successful signup, set user_authenticated to True
         user_authenticated = True
-        return jsonify({'success': True, 'message': 'Signup successful', 'user_authenticated': user_authenticated, 'user': new_user})
+        return jsonify({'success': True, 'message': 'Signup successful', 'user_authenticated': user_authenticated})
 
     except Exception as e:
         print(f"Error in signup route: {e}")
-        # Log the error for debugging purposes
-        # You can also return a more specific error message or status code based on the type of exception
         return jsonify({'success': False, 'message': 'Internal Server Error'}), 500
 
+# Modify the login route to verify hashed passwords
 @app.route('/login', methods=['POST'])
 def login():
     try:
-        # Retrieve username and password from the login form data
         username = request.form['username']
         password = request.form['password']
 
-        # Assuming you have a function to retrieve user details based on the login credentials
-        user = User.query.filter_by(username=username, password=password).first()
+        user = User.query.filter_by(username=username).first()
 
-        if user:
-            # After successful login
-            login_user(user)  # Log in the user
+        if user and user.check_password(password):  # Verify hashed password
+            login_user(user)
             session['user_authenticated'] = True
-            session['current_user'] = user  # Store user details in session
+            session['current_user'] = user
             return jsonify({'success': True, 'message': 'Login successful'})
         else:
-            return jsonify({'success': False, 'message': 'Invalid credentials. Please try again.'}), 401  # Unauthorized status code
+            return jsonify({'success': False, 'message': 'Invalid credentials. Please try again.'}), 401
 
     except Exception as e:
         print(f"Error during login: {e}")
-        # Log the error for debugging purposes
-        # Return a more specific error message or status code based on the type of exception
         return jsonify({'success': False, 'message': 'Internal Server Error'}), 500
 
 # Example route for login success redirect
@@ -160,11 +162,6 @@ def remove_lesson():
 
     return jsonify({'success': True, 'message': 'Lesson removed from cart'})
 
-@app.route('/user_account_page')
-@login_required
-def user_account_page():
-    return render_template('userAccountPage.html')
-
 @app.route('/logout', methods=['POST'])
 @login_required
 def logout():
@@ -201,6 +198,8 @@ def get_payments():
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
+create_db()
 
 if __name__ == '__main__':
     app.run(debug=True)
