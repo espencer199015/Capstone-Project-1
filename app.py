@@ -3,9 +3,11 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from square.client import Client
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask import redirect
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://elizabetherlandson1:newpassword@localhost/capstoneproject1'
+app.secret_key = 'abc123'
 db = SQLAlchemy(app)
 access_token = "EAAAEJY2g4oGGzqP3J92OmmnFb8121A5E-XhpaxuNwb5SFdigzdDv574UA0OXvJY"
 client = Client(access_token=access_token)
@@ -50,11 +52,23 @@ def home():
 
 @app.route('/home')
 def home_page():
-    return render_template('homePage.html')
+    print(f"Session data: {session}")
+    # Load user information if authenticated
+    user = None
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        print(f"User authenticated: {user.username if user else 'None'}")
+    return render_template('homePage.html', user=user)
 
 @app.route('/lessonPage')
 def lesson_page():
-    return render_template('lessonPage.html')
+    print(f"Session data: {session}")
+    # Load user information if authenticated
+    user = None
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        print(f"User authenticated: {user.username if user else 'None'}")
+    return render_template('lessonPage.html', user=user)
 
 @app.route('/loginSignupPage')
 def login_signup_page():
@@ -63,7 +77,15 @@ def login_signup_page():
 @app.route('/user_account_page')
 @login_required
 def user_account_page():
-    return render_template('userAccountPage.html')
+    user_id = session.get('user_id')
+    print(session['cart'])
+    if user_id:
+        user = User.query.get(user_id)
+        if user:
+            return render_template('userAccountPage.html', user=user, session=session)
+    
+    # Handle cases where user or user_id is not found
+    return render_template('error.html', message='User not found')
 
 @app.route('/user_account_page_new')  # Renamed route to avoid duplication
 @login_required
@@ -73,11 +95,16 @@ def user_account_page_new():
 @app.route('/signup', methods=['POST'])
 def signup():
     try:
-        # Validate that required fields are present in the form data
+# Validate that required fields are present in the form data
         required_fields = ['username', 'password', 'first_name', 'last_name', 'email', 'home_address', 'city_town', 'state', 'zip_code']
         if not all(field in request.form for field in required_fields):
             return jsonify({'success': False, 'message': 'Missing required fields'}), 400
-
+        
+# Check if the email already exists in the database
+        existing_user = User.query.filter_by(email=request.form['email']).first()
+        if existing_user:
+            return jsonify({'success': False, 'message': 'Email already exists. Please use a different email.'}), 409
+        
         new_user = User(
             username=request.form['username'],
             first_name=request.form['first_name'],
@@ -93,6 +120,8 @@ def signup():
         db.session.add(new_user)
         db.session.commit()
 
+        session['user_id'] = new_user.id
+        session['user_authenticated'] = True
         user_authenticated = True
         return jsonify({'success': True, 'message': 'Signup successful', 'user_authenticated': user_authenticated})
 
@@ -100,20 +129,28 @@ def signup():
         print(f"Error in signup route: {e}")
         return jsonify({'success': False, 'message': 'Internal Server Error'}), 500
 
-# Modify the login route to verify hashed passwords
 @app.route('/login', methods=['POST'])
 def login():
     try:
         username = request.form['username']
         password = request.form['password']
-
+        
         user = User.query.filter_by(username=username).first()
 
         if user and user.check_password(password):  # Verify hashed password
             login_user(user)
-            session['user_authenticated'] = True
-            session['current_user'] = user
-            return jsonify({'success': True, 'message': 'Login successful'})
+            
+            # Store user information in the session upon successful login
+            session['user_id'] = user.id
+            session['username'] = user.username
+            session['user_authenticated'] = True  # Set user authentication status
+
+            # Print session variables to check
+            print(session)
+
+            # Redirect to the user's account page upon successful login
+            return redirect(url_for('user_account_page'))
+
         else:
             return jsonify({'success': False, 'message': 'Invalid credentials. Please try again.'}), 401
 
@@ -145,8 +182,10 @@ def select_lesson():
     # Add the lesson to the user's session cart
     if 'cart' not in session:
         session['cart'] = []
-
+    cart_list = session['cart']
+    session['cart'] = cart_list
     session['cart'].append({'lesson_name': lesson_name, 'lesson_price': lesson_price})
+    print(session['cart'])
     return jsonify({'success': True, 'message': 'Lesson added to cart'})
 
 @app.route('/remove_lesson', methods=['POST'])
