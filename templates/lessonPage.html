@@ -16,6 +16,11 @@
         <li><a href="{{ url_for('lesson_page') }}">Lessons</a></li>
         {% if user %}
             <li><a href="{{ url_for('user_account_page') }}">Howdy, {{ user.username }}!</a></li>
+            <li>
+                <form action="/logout" method="post">
+                    <input class="logout-button" type="submit" value="Logout">
+                </form>
+            </li>
         {% else %}
             <li><a href="{{ url_for('login_signup_page') }}">Login/Signup</a></li>
         {% endif %}

@@ -1,16 +1,41 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from square.client import Client
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import redirect
+import stripe
+from flask import jsonify
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://elizabetherlandson1:newpassword@localhost/capstoneproject1'
 app.secret_key = 'abc123'
 db = SQLAlchemy(app)
-access_token = "EAAAEJY2g4oGGzqP3J92OmmnFb8121A5E-XhpaxuNwb5SFdigzdDv574UA0OXvJY"
-client = Client(access_token=access_token)
+
+stripe.api_key = "sk_test_4eC39HqLyjWDarjtT1zdp7dc"
+
+# Example route using the Stripe API
+@app.route('/process_payment', methods=['POST'])
+@login_required
+def process_payment():
+    try:
+        # Get payment details from request form
+        amount = request.form['amount']
+        currency = request.form['currency']
+        source = request.form['source']  # This could be a Stripe token or card details
+        
+        # Create a charge using Stripe API
+        charge = stripe.Charge.create(
+            amount=amount,
+            currency=currency,
+            source=source
+        )
+       
+        return jsonify({'success': True, 'message': 'Payment processed successfully'})
+    
+    except stripe.error.StripeError as e:
+        # Handle specific Stripe errors
+        return jsonify({'success': False, 'message': 'Payment failed. Please try again.'})
+
 
 # Create the database table
 def create_db():
@@ -55,19 +80,17 @@ def home_page():
     print(f"Session data: {session}")
     # Load user information if authenticated
     user = None
-    if 'user_id' in session:
-        user = User.query.get(session['user_id'])
-        print(f"User authenticated: {user.username if user else 'None'}")
+    if 'user_authenticated' in session and session['user_authenticated']:
+        if 'user_id' in session:
+            user = User.query.get(session['user_id'])
+            print(f"User authenticated: {user.username if user else 'None'}")
     return render_template('homePage.html', user=user)
 
 @app.route('/lessonPage')
 def lesson_page():
-    print(f"Session data: {session}")
-    # Load user information if authenticated
     user = None
     if 'user_id' in session:
         user = User.query.get(session['user_id'])
-        print(f"User authenticated: {user.username if user else 'None'}")
     return render_template('lessonPage.html', user=user)
 
 @app.route('/loginSignupPage')
@@ -186,7 +209,7 @@ def select_lesson():
     session['cart'] = cart_list
     session['cart'].append({'lesson_name': lesson_name, 'lesson_price': lesson_price})
     print(session['cart'])
-    return jsonify({'success': True, 'message': 'Lesson added to cart'})
+    return redirect(url_for('user_account_page')) 
 
 @app.route('/remove_lesson', methods=['POST'])
 def remove_lesson():
@@ -199,15 +222,53 @@ def remove_lesson():
     if 'cart' in session:
         session['cart'] = [lesson for lesson in session['cart'] if lesson['lesson_name'] != lesson_name]
 
-    return jsonify({'success': True, 'message': 'Lesson removed from cart'})
+    return redirect(url_for('user_account_page'))
+
+@app.route('/create_checkout_session', methods=['POST'])
+@login_required
+def create_checkout_session():
+    try:
+        # Extract necessary details from the request to create a Stripe Checkout session
+        # For instance, retrieve amount, currency, and items from the session['cart']
+
+        # Create a Checkout session using Stripe API
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[
+                # Add line items based on your cart or products
+                # Example: {'price': 'price_ID', 'quantity': 1},
+            ],
+            mode='payment',
+            success_url='YOUR_SUCCESS_URL',
+            cancel_url='YOUR_CANCEL_URL',
+        )
+
+        return jsonify({'success': True, 'session_url': checkout_session.url})
+
+    except Exception as e:
+        print(f"Error creating Checkout Session: {e}")
+        return jsonify({'success': False, 'error': 'Server error'}), 500
+
+# Rename the other function to avoid endpoint duplication
+@app.route('/create_checkout_session_new', methods=['POST'])
+@login_required
+def create_checkout_session_new():
+    try:
+        # Additional logic for another checkout session if needed
+
+        return jsonify({'success': True, 'message': 'Another checkout session created'})
+
+    except Exception as e:
+        print(f"Error creating another Checkout Session: {e}")
+        return jsonify({'success': False, 'error': 'Server error'}), 500
 
 @app.route('/logout', methods=['POST'])
 @login_required
 def logout():
     logout_user()  # Log out the user
-    # Clear session data
-    session.pop('user_authenticated', None)
-    session.pop('current_user', None)
+    # Clear session data related to user authentication
+    session.pop('user_id', None)
+    session['user_authenticated'] = False  # Reset user authentication status
     return redirect(url_for('home'))
 
 # Change one of the select_lesson functions to select_lesson_remove
@@ -222,21 +283,7 @@ def select_lesson_remove():
     if 'cart' in session:
         session['cart'] = [lesson for lesson in session['cart'] if lesson['lesson_name'] != lesson_name]
 
-    return jsonify({'success': True, 'message': 'Lesson removed from cart'})
-
-@app.route('/get_payments', methods=['GET'])
-def get_payments():
-    try:
-        # Retrieve payments
-        result = client.payments.list_payments()
-
-        if result.is_success():
-            return jsonify({'success': True, 'payments': result.body})
-        elif result.is_error():
-            return jsonify({'success': False, 'error': result.errors}), 500
-
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+    return redirect(url_for('user_account_page'))
 
 create_db()
 

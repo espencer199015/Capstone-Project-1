@@ -45,7 +45,16 @@ nav a {
     color: #fff;
     text-decoration: none;
 }
+/* logout button style */
+.logout-button {
+    background-color: #a9ba9d; /* Set your default background color */
+    transition: background-color 0.3s ease; /* Transition effect */
+}
 
+/* Change color on hover */
+.logout-button:hover {
+    background-color: #f5e6cc; /* Change to the desired color when hovered */
+}
   /* Main Content Styles */
 main {
     padding: 20px;

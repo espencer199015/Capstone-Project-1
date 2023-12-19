@@ -15,8 +15,13 @@
         <ul>
             <li><a href="{{ url_for('home') }}">Home</a></li>
             <li><a href="{{ url_for('lesson_page') }}">Lessons</a></li>
-            {% if user_authenticated %}
-                <li><a href="{{ url_for('user_account_page') }}">Howdy, {{ current_user.username }}!</a></li>
+            {% if user %}
+                <li><a href="{{ url_for('user_account_page') }}">Howdy, {{ user.username }}!</a></li>
+                <li>
+                <form action="/logout" method="post">
+                    <input class="logout-button" type="submit" value="Logout">
+                </form>
+            </li>
             {% else %}
                 <li><a href="{{ url_for('login_signup_page') }}">Login/Signup</a></li>
             {% endif %}
@@ -89,6 +94,31 @@
             .catch(error => {
                 console.error('Error fetching payments:', error);
             });
+        document.getElementById('checkout-btn').addEventListener('click', function() {
+        fetch('/create_checkout_session', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                // Add necessary details like amount, items, etc.
+                // You might want to gather these details from your session['cart']
+                // Example: amount, currency, items
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Redirect to the Stripe Checkout page
+                window.location.href = data.session_url;
+            } else {
+                console.error('Error creating Checkout Session:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error creating Checkout Session:', error);
+        });
+    });
     </script>
 </body>
 </html>
