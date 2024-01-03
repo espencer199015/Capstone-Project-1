@@ -228,8 +228,11 @@ def remove_lesson():
 @login_required
 def create_checkout_session():
     try:
+        print("Inside create_checkout_session")  # Check if the function is reached
+
         # Extract necessary details from the request to create a Stripe Checkout session
         # For instance, retrieve amount, currency, and items from the session['cart']
+        print(request.form)  # Print request form data for debugging
 
         # Create a Checkout session using Stripe API
         checkout_session = stripe.checkout.Session.create(
@@ -237,30 +240,22 @@ def create_checkout_session():
             line_items=[
                 # Add line items based on your cart or products
                 # Example: {'price': 'price_ID', 'quantity': 1},
+                {'$25': 'Beginner Lesson', 'quantity': 1},
+                {'$35': 'Intermediate Lesson', 'quantity': 1},
+                {'$45': 'Advanced Lesson', 'quantity': 1}
             ],
             mode='payment',
-            success_url='YOUR_SUCCESS_URL',
-            cancel_url='YOUR_CANCEL_URL',
+            success_url='https://checkout.stripe.com/c/pay/cs_test_a11YYufWQzNY63zpQ6QSNRQhkUpVph4WRmzW0zWJO2znZKdVujZ0N0S22u#fidkdWxOYHwnPyd1blpxYHZxWjA0SDdPUW5JbmFMck1wMmx9N2BLZjFEfGRUNWhqTmJ%2FM2F8bUA2SDRySkFdUV81T1BSV0YxcWJcTUJcYW5rSzN3dzBLPUE0TzRKTTxzNFBjPWZEX1NKSkxpNTVjRjN8VHE0YicpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl',
+            cancel_url='https://userAccountPage.html',
         )
+
+        print(checkout_session)  # Print the created checkout session for debugging
 
         return jsonify({'success': True, 'session_url': checkout_session.url})
 
     except Exception as e:
         print(f"Error creating Checkout Session: {e}")
-        return jsonify({'success': False, 'error': 'Server error'}), 500
-
-# Rename the other function to avoid endpoint duplication
-@app.route('/create_checkout_session_new', methods=['POST'])
-@login_required
-def create_checkout_session_new():
-    try:
-        # Additional logic for another checkout session if needed
-
-        return jsonify({'success': True, 'message': 'Another checkout session created'})
-
-    except Exception as e:
-        print(f"Error creating another Checkout Session: {e}")
-        return jsonify({'success': False, 'error': 'Server error'}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/logout', methods=['POST'])
 @login_required
