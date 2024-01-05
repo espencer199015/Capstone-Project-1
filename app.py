@@ -3,39 +3,13 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import redirect
-import stripe
 from flask import jsonify
+import requests
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://elizabetherlandson1:newpassword@localhost/capstoneproject1'
 app.secret_key = 'abc123'
 db = SQLAlchemy(app)
-
-stripe.api_key = "sk_test_4eC39HqLyjWDarjtT1zdp7dc"
-
-# Example route using the Stripe API
-@app.route('/process_payment', methods=['POST'])
-@login_required
-def process_payment():
-    try:
-        # Get payment details from request form
-        amount = request.form['amount']
-        currency = request.form['currency']
-        source = request.form['source']  # This could be a Stripe token or card details
-        
-        # Create a charge using Stripe API
-        charge = stripe.Charge.create(
-            amount=amount,
-            currency=currency,
-            source=source
-        )
-       
-        return jsonify({'success': True, 'message': 'Payment processed successfully'})
-    
-    except stripe.error.StripeError as e:
-        # Handle specific Stripe errors
-        return jsonify({'success': False, 'message': 'Payment failed. Please try again.'})
-
 
 # Create the database table
 def create_db():
@@ -224,39 +198,6 @@ def remove_lesson():
 
     return redirect(url_for('user_account_page'))
 
-@app.route('/create_checkout_session', methods=['POST'])
-@login_required
-def create_checkout_session():
-    try:
-        print("Inside create_checkout_session")  # Check if the function is reached
-
-        # Extract necessary details from the request to create a Stripe Checkout session
-        # For instance, retrieve amount, currency, and items from the session['cart']
-        print(request.form)  # Print request form data for debugging
-
-        # Create a Checkout session using Stripe API
-        checkout_session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=[
-                # Add line items based on your cart or products
-                # Example: {'price': 'price_ID', 'quantity': 1},
-                {'$25': 'Beginner Lesson', 'quantity': 1},
-                {'$35': 'Intermediate Lesson', 'quantity': 1},
-                {'$45': 'Advanced Lesson', 'quantity': 1}
-            ],
-            mode='payment',
-            success_url='https://checkout.stripe.com/c/pay/cs_test_a11YYufWQzNY63zpQ6QSNRQhkUpVph4WRmzW0zWJO2znZKdVujZ0N0S22u#fidkdWxOYHwnPyd1blpxYHZxWjA0SDdPUW5JbmFMck1wMmx9N2BLZjFEfGRUNWhqTmJ%2FM2F8bUA2SDRySkFdUV81T1BSV0YxcWJcTUJcYW5rSzN3dzBLPUE0TzRKTTxzNFBjPWZEX1NKSkxpNTVjRjN8VHE0YicpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl',
-            cancel_url='https://userAccountPage.html',
-        )
-
-        print(checkout_session)  # Print the created checkout session for debugging
-
-        return jsonify({'success': True, 'session_url': checkout_session.url})
-
-    except Exception as e:
-        print(f"Error creating Checkout Session: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
 @app.route('/logout', methods=['POST'])
 @login_required
 def logout():
@@ -280,6 +221,90 @@ def select_lesson_remove():
 
     return redirect(url_for('user_account_page'))
 
+@app.route('/generate_invoice', methods=['POST'])
+def generate_invoice():
+    url = "https://invoice-generator.com"
+    headers = {"Content-Type": "application/json"}
+    payload = {
+    "from": "Dream Ride Stables",
+    "to": "customer",
+    "date": "04.01.2024",
+    "items": [
+        {
+            "name": "Beginner Lesson",
+            "quantity": 1,
+            "unit_cost": 25.00,
+            "description": """Skills Taught
+    Basic Barn Chores (stall cleaning, grooming supply storage, and tack storage)
+    Grooming
+    Tacking and Untacking Horse
+    Beginning Groundwork (leading at walk and trot, stopping and backing up)
+    Mounting and Dismounting
+    Walking, Turning, Stopping, and Reversing
+    Trotting (seated and posting)
+    Jumping Position in the saddle
+    Pole work (walk and trot)"""
+        },
+        {
+            "name": "Intermediate Lesson",
+            "quantity": 1,
+            "unit_cost": 35.00,
+            "description": """Pre-requisites
+    Mastery of Beginner Level Skills
+    Completion and Passing of Riding Skill Level Test
+    Skills Taught
+    Bathing
+    Mane Pulling and Leg Wrapping
+    Trailer Loading and Unloading
+    Intermediate Groundwork (lunging at walk and trot)
+    Cantering
+    Pole Work (walk, trot, canter)
+    First jumps
+    Simple jump course (max. 4 jumps)"""
+        },
+        {
+            "name": "Advanced Lesson",
+            "quantity": 1,
+            "unit_cost": 45.00,
+            "description": """Pre-requisites
+    Mastery of Beginner and Intermediate Level Skills
+    Completion and Passing of Riding Skill Level Test
+    Skills Taught
+    Horse Feeding Schedules and Supplements
+    Show Prepping
+    Illness and Ailment Identification
+    Advanced Groundwork (lunging at canter, over ground poles and jumps)
+    Galloping
+    Full Jumping Courses
+    First Competitions"""
+        }
+    ]
+    }
+    try:
+        response = requests.post(url, json=payload, headers=headers)
+    
+        if response.ok:
+            print("Request successful!")
+            print("Response:")
+            try:
+                json_response = response.json()
+                return jsonify({'success': True, 'data': json_response})  # Modify this based on the actual response data
+            except ValueError:
+                # The response is not JSON, handle as needed
+                print("Non-JSON response received")
+                print("Response content:")
+                print(response.text)
+                return jsonify({'success': False, 'message': 'Non-JSON response received'}), 500
+        else:
+            print(f"Request failed with status code: {response.status_code}")
+            print("Response:")
+            print(response.text)
+            return jsonify({'success': False, 'message': 'Invoice generation failed'}), 500
+
+    except Exception as e:
+        print(f"An error occurred during invoice generation: {e}")
+        return jsonify({'success': False, 'message': 'An error occurred during invoice generation'}), 500
+    
 create_db()
 
 if __name__ == '__main__':
