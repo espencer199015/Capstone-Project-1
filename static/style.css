@@ -66,6 +66,9 @@ main h2 {
 
   /* Footer Styles */
 footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
     background-color: #5C4033;
     padding: 4px;
     color: #fff;

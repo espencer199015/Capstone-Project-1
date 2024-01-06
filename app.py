@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify, session
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session, send_file 
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import redirect
 from flask import jsonify
 import requests
+import io
+from datetime import datetime
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://elizabetherlandson1:newpassword@localhost/capstoneproject1'
@@ -168,6 +170,33 @@ def login_success_redirect():
         # If no redirect URL is stored, go to the home page
         return redirect(url_for('home'))
 
+@app.route('/update_user', methods=['POST'])
+def update_user():
+    try:
+        # Check if the user is authenticated
+        if not session.get('user_authenticated'):
+            return jsonify({'success': False, 'message': 'User not authenticated'}), 401
+
+        # Get the user's account details
+        user_id = session.get('user_id')
+        user = User.query.get(user_id)
+
+        if not user:
+            return jsonify({'success': False, 'message': 'User not found'}), 404
+
+        # Get the new username from the request JSON
+        new_username = request.json.get('newUsername')
+
+        # Update the user's username
+        user.username = new_username
+        db.session.commit()
+
+        return jsonify({'success': True, 'message': 'User information updated successfully'})
+
+    except Exception as e:
+        print(f"An error occurred during user update: {e}")
+        return jsonify({'success': False, 'message': 'An error occurred during user update'}), 500
+
 @app.route('/select_lesson', methods=['POST'])
 def select_lesson():
     if not session.get('user_authenticated'):
@@ -223,82 +252,58 @@ def select_lesson_remove():
 
 @app.route('/generate_invoice', methods=['POST'])
 def generate_invoice():
-    url = "https://invoice-generator.com"
-    headers = {"Content-Type": "application/json"}
-    payload = {
-    "from": "Dream Ride Stables",
-    "to": "customer",
-    "date": "04.01.2024",
-    "items": [
-        {
-            "name": "Beginner Lesson",
-            "quantity": 1,
-            "unit_cost": 25.00,
-            "description": """Skills Taught
-    Basic Barn Chores (stall cleaning, grooming supply storage, and tack storage)
-    Grooming
-    Tacking and Untacking Horse
-    Beginning Groundwork (leading at walk and trot, stopping and backing up)
-    Mounting and Dismounting
-    Walking, Turning, Stopping, and Reversing
-    Trotting (seated and posting)
-    Jumping Position in the saddle
-    Pole work (walk and trot)"""
-        },
-        {
-            "name": "Intermediate Lesson",
-            "quantity": 1,
-            "unit_cost": 35.00,
-            "description": """Pre-requisites
-    Mastery of Beginner Level Skills
-    Completion and Passing of Riding Skill Level Test
-    Skills Taught
-    Bathing
-    Mane Pulling and Leg Wrapping
-    Trailer Loading and Unloading
-    Intermediate Groundwork (lunging at walk and trot)
-    Cantering
-    Pole Work (walk, trot, canter)
-    First jumps
-    Simple jump course (max. 4 jumps)"""
-        },
-        {
-            "name": "Advanced Lesson",
-            "quantity": 1,
-            "unit_cost": 45.00,
-            "description": """Pre-requisites
-    Mastery of Beginner and Intermediate Level Skills
-    Completion and Passing of Riding Skill Level Test
-    Skills Taught
-    Horse Feeding Schedules and Supplements
-    Show Prepping
-    Illness and Ailment Identification
-    Advanced Groundwork (lunging at canter, over ground poles and jumps)
-    Galloping
-    Full Jumping Courses
-    First Competitions"""
-        }
-    ]
-    }
     try:
+        # Check if the user is authenticated
+        if not session.get('user_authenticated'):
+            return jsonify({'success': False, 'message': 'User not authenticated'}), 401
+
+        # Get the user's account details
+        user_id = session.get('user_id')
+        user = User.query.get(user_id)
+
+        if not user:
+            return jsonify({'success': False, 'message': 'User not found'}), 404
+
+        # Get the current date
+        current_date = datetime.now().strftime("%m.%d.%Y")
+
+        # Get lessons from the user's cart
+        lessons_in_cart = session.get('cart', [])
+        if not lessons_in_cart:
+            return jsonify({'success': False, 'message': 'No lessons in the cart'}), 400
+
+        # Prepare payload for the invoice
+        payload = {
+            "from": "Dream Ride Stables",
+            "to": f"{user.first_name} {user.last_name}",
+            "date": current_date,
+            "items": []
+        }
+
+        # Add each lesson in the cart to the invoice payload
+        for lesson in lessons_in_cart:
+            item = {
+                "name": lesson['lesson_name'],
+                "quantity": 1,
+                "unit_cost": float(lesson['lesson_price']),
+                "description": f"Lesson details: {lesson['lesson_name']}"
+            }
+            payload["items"].append(item)
+
+        # Make the request to the invoice generation API
+        url = "https://invoice-generator.com"
+        headers = {"Content-Type": "application/json"}
         response = requests.post(url, json=payload, headers=headers)
-    
+
         if response.ok:
-            print("Request successful!")
-            print("Response:")
-            try:
-                json_response = response.json()
-                return jsonify({'success': True, 'data': json_response})  # Modify this based on the actual response data
-            except ValueError:
-                # The response is not JSON, handle as needed
-                print("Non-JSON response received")
-                print("Response content:")
-                print(response.text)
-                return jsonify({'success': False, 'message': 'Non-JSON response received'}), 500
+            # Send the generated invoice as a file
+            return send_file(
+                io.BytesIO(response.content),
+                as_attachment=True,
+                download_name='invoice.pdf',
+                mimetype='application/pdf'
+            )
         else:
-            print(f"Request failed with status code: {response.status_code}")
-            print("Response:")
-            print(response.text)
             return jsonify({'success': False, 'message': 'Invoice generation failed'}), 500
 
     except Exception as e:

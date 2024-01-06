@@ -75,4 +75,125 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
+    
+    // Check if the edit button element is found
+    const editBtn = document.getElementById('edit-btn');
+    if (editBtn) {
+        editBtn.addEventListener('click', function () {
+            console.log('Edit button clicked');
+
+            // Toggle visibility of edit form
+            const editForm = document.getElementById('edit-form');
+            if (editForm) {
+                editForm.style.display = (editForm.style.display === 'none') ? 'block' : 'none';
+                console.log('Edit form visibility toggled:', editForm.style.display);
+            } else {
+                console.error('Edit form not found');
+            }
+        });
+    } else {
+        console.error('Edit button not found');
+    }
+    // Define an empty checkout function
+    function checkout() {
+        // You can implement the logic for the checkout process here
+        console.log("Checkout button clicked");
+    }
+
+    // Add an event listener for the form submission
+    const editUserForm = document.getElementById('edit-user-form');
+    if (editUserForm) {
+        editUserForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            console.log('Form submitted. Implement the logic to update user information.');
+            // Implement the logic to update user information
+            // Get the new username from the form
+            const newUsername = document.getElementById('new-username').value;
+            const newPassword = document.getElementById('new-password').value;
+            const newEmail = document.getElementById('new-email').value;
+            const newFirstName = document.getElementById('new-first-name').value;
+            const newLastName = document.getElementById('new-last-name').value;
+            const newHomeAddress = document.getElementById('new-home-address').value;
+            const newCityTown = document.getElementById('new-city-town').value;
+            const newState = document.getElementById('new-state').value;
+            const newZipCode = document.getElementById('new-zip-code').value;
+
+            // Implement the logic to update user information
+            fetch('/update_user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    newUsername: newUsername,
+                    newPassword: newPassword,
+                    newEmail: newEmail,
+                    newFirstName: newFirstName,
+                    newLastName: newLastName,
+                    newHomeAddress: newHomeAddress,
+                    newCityTown: newCityTown,
+                    newState: newState,
+                    newZipCode: newZipCode,
+                    // Add other form fields as needed
+                }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    // Log the response for debugging
+                    console.log('Update User Response:', response);
+                    // Handle a successful response (e.g., display a success message)
+                    console.log('User information updated successfully');
+                    // Reload the user account page to reflect the changes
+                    location.reload();
+                })
+                .catch(error => {
+                    // Handle errors if the request fails
+                    console.error('Error updating user information:', error);
+                    // Optionally, display an error message to the user
+                });
+        });
+    }
+
+    function viewCart() {
+        // Add any logic needed when clicking the "View Cart" button
+        // For example, you might open a modal or navigate to a cart page
+        console.log("View Cart button clicked");
+    }
+
+    document.getElementById('checkout-btn').addEventListener('click', function () {
+        fetch('/generate_invoice', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                // Add any necessary payload data for invoice generation here
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // Create a temporary link element
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = 'document.pdf';
+                // Append the link to the body
+                document.body.appendChild(link);
+                // Trigger a click on the link to start the download
+                link.click();
+                // Remove the link from the document
+                document.body.removeChild(link);
+            })
+            .catch(error => {
+                // Handle errors if the request fails
+                console.error('Error:', error);
+                // Optionally, display an error message to the user
+            });
+    });
 });
