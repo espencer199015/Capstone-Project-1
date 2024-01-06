@@ -1,7 +1,7 @@
 # Capstone-Project-1
 
 ## Overview
-This project is part of my Springboard curriculum. It involves the design and development of a horse riding website, providing users with a platform for creating accounts, logging in and out, and selecting riding lessons for purchase. The project features a combination of technologies, including HTML, CSS, a Invoice Generator API, Python for back-end development, and JavaScript for front-end development. It also integrates a SQL and PostgreSQL database to store user login and account information.
+This project is part of my Springboard curriculum. It involves the design and development of a horse riding website, providing users with a platform for creating accounts, logging in and out, and selecting riding lessons for purchase. The project features a combination of technologies, including HTML, CSS, an invoice generator API, Python for back-end development, and JavaScript for front-end development. It also integrates a SQL and PostgreSQL database to store user login and account information.
 
 ## Website URL
 - file:///media/fuse/crostini_e5b74d27a5fa191d5312cf35e6140aa9c333fe58_termina_penguin/Springboard/Capstone-Project-1/templates/homePage.html
