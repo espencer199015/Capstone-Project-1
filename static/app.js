@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // For example, you might open a modal or navigate to a cart page
         console.log("View Cart button clicked");
     }
-
+if (document.getElementById('checkout-btn')){
     document.getElementById('checkout-btn').addEventListener('click', function () {
         fetch('/generate_invoice', {
             method: 'POST',
@@ -196,4 +196,5 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Optionally, display an error message to the user
             });
     });
+}
 });

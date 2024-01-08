@@ -186,9 +186,25 @@ def update_user():
 
         # Get the new username from the request JSON
         new_username = request.json.get('newUsername')
-
+        new_password = request.json.get('newPassword')
+        new_email = request.json.get('newEmail')
+        new_first_name = request.json.get('new-first-name')
+        new_last_name = request.json.get('newLastName')
+        new_home_address = request.json.get('newHomeAddress')
+        new_city_town = request.json.get('newCityTown')
+        new_state = request.json.get('newState')
+        new_zip_code = request.json.get('newZipCode')
         # Update the user's username
         user.username = new_username
+        user.password = new_password
+        user.email = new_email
+        user.firstname = new_first_name
+        user.lastname = new_last_name
+        user.homeaddress = new_home_address
+        user.citytown = new_city_town
+        user.state = new_state
+        user.zipcode = new_zip_code
+        
         db.session.commit()
 
         return jsonify({'success': True, 'message': 'User information updated successfully'})
