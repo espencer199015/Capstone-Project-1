@@ -32,14 +32,14 @@
         <h1>User Account Details</h1>
         {% if user %}
             <!-- Display user information if authenticated -->
-            <p>Username: {{ user.username }}</p>
-            <p>Email: {{ user.email }}</p>
-            <p>First Name: {{ user.first_name }}</p>
-            <p>Last Name: {{ user.last_name }}</p>
-            <p>Home Address: {{ user.home_address }}</p>
-            <p>City/Town: {{ user.city_town }}</p>
-            <p>State: {{ user.state }}</p>
-            <p>Zip Code: {{ user.zip_code }}</p>
+            <p id="account-details-username">Username: {{ user.username }}</p>
+            <p id="account-details-email">Email: {{ user.email }}</p>
+            <p id="account-details-first-name">First Name: {{ user.first_name }}</p>
+            <p id="account-details-last-name">Last Name: {{ user.last_name }}</p>
+            <p id="account-details-home-address">Home Address: {{ user.home_address }}</p>
+            <p id="account-details-city-town">City/Town: {{ user.city_town }}</p>
+            <p id="account-details-state">State: {{ user.state }}</p>
+            <p id="account-details-zip-code">Zip Code: {{ user.zip_code }}</p>
             <!-- edit button -->
             <button id="edit-btn">EDIT</button>
         {% else %}
@@ -48,13 +48,13 @@
     </div>   
 <!-- Edit Form Section (Initially Hidden) -->
     <div id="edit-form" style="display: none;">
-        <form id="edit-user-form">
+        <form id="edit-user-form" action="{{ url_for('update_user') }}">
             <!-- Include form fields for editing user information -->
             <label for="new-username">New Username:</label>
-            <input type="text" id="new-username" name="new-username">
+            <input type="text" id="new-username" name="new-username" value="">
         
             <label for="new-password">New Password:</label>
-            <input type="password" id="new-password" name="new-password">
+            <input type="password" id="new-password" name="new-password" value="">
 
             <label for="new-email">New Email:</label>
             <input type="email" id="new-email" name="new-email">
@@ -79,7 +79,7 @@
 
             <!-- Include other form fields as needed -->
 
-            <button type="submit">Save Changes</button>
+            <button id="edit-user-form"type="submit">Save Changes</button>
         </form>
     </div>
   <!-- Cart Section -->
@@ -111,5 +111,18 @@
 <br>
     <footer></footer>
     <script src="{{ url_for('static', filename='app.js') }}"></script>
+    <script>
+    function editUser() {
+        // Other form processing logic
+
+        // Set new username and new password fields to empty
+        document.getElementById('new-username').value = '';
+        document.getElementById('new-password').value = '';
+
+        // Submit the form or perform other actions
+        document.getElementById('editForm').submit();
+    }
+</script>
+
 </body>
 </html>

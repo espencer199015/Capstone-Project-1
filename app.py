@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, send_file 
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import redirect
@@ -77,7 +78,6 @@ def login_signup_page():
 @login_required
 def user_account_page():
     user_id = session.get('user_id')
-    print(session['cart'])
     if user_id:
         user = User.query.get(user_id)
         if user:
@@ -94,16 +94,16 @@ def user_account_page_new():
 @app.route('/signup', methods=['POST'])
 def signup():
     try:
-# Validate that required fields are present in the form data
+        # Validate that required fields are present in the form data
         required_fields = ['username', 'password', 'first_name', 'last_name', 'email', 'home_address', 'city_town', 'state', 'zip_code']
         if not all(field in request.form for field in required_fields):
             return jsonify({'success': False, 'message': 'Missing required fields'}), 400
-        
-# Check if the email already exists in the database
+
+        # Check if the email already exists in the database
         existing_user = User.query.filter_by(email=request.form['email']).first()
         if existing_user:
             return jsonify({'success': False, 'message': 'Email already exists. Please use a different email.'}), 409
-        
+
         new_user = User(
             username=request.form['username'],
             first_name=request.form['first_name'],
@@ -120,13 +120,18 @@ def signup():
         db.session.commit()
 
         session['user_id'] = new_user.id
-        session['user_authenticated'] = True
         user_authenticated = True
+        session['user_authenticated'] = True
         return jsonify({'success': True, 'message': 'Signup successful', 'user_authenticated': user_authenticated})
+
+    except IntegrityError as e:
+        # Handle unique constraint violation (duplicate username)
+        db.session.rollback()  # Rollback the transaction
+        return jsonify({'success': False, 'message': 'Username already in use'}), 400
 
     except Exception as e:
         print(f"Error in signup route: {e}")
-        return jsonify({'success': False, 'message': 'Internal Server Error'}), 500
+        return jsonify({'success': False, 'message': 'Internal Server Error', 'error': str(e)}), 500
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -184,32 +189,49 @@ def update_user():
         if not user:
             return jsonify({'success': False, 'message': 'User not found'}), 404
 
-        # Get the new username from the request JSON
+        # Get the updated user information from the request JSON
         new_username = request.json.get('newUsername')
         new_password = request.json.get('newPassword')
         new_email = request.json.get('newEmail')
-        new_first_name = request.json.get('new-first-name')
+        new_first_name = request.json.get('newFirstName')
         new_last_name = request.json.get('newLastName')
         new_home_address = request.json.get('newHomeAddress')
         new_city_town = request.json.get('newCityTown')
         new_state = request.json.get('newState')
         new_zip_code = request.json.get('newZipCode')
-        # Update the user's username
-        user.username = new_username
-        user.password = new_password
-        user.email = new_email
-        user.firstname = new_first_name
-        user.lastname = new_last_name
-        user.homeaddress = new_home_address
-        user.citytown = new_city_town
-        user.state = new_state
-        user.zipcode = new_zip_code
-        
+
+        # Check if username, password, or email already exist
+        if new_username and User.query.filter(User.username == new_username, User.id != user.id).first():
+            return jsonify({'success': False, 'message': 'Username already exists'}), 400
+
+        if new_password and User.query.filter_by(password=new_password).first():
+            return jsonify({'success': False, 'message': 'Password already exists'}), 400
+
+        if new_email and User.query.filter(User.email == new_email, User.id != user.id).first():
+            return jsonify({'success': False, 'message': 'Email already exists'}), 400
+
+        # Update user information
+        user.username = new_username or user.username
+        user.password = new_password or user.password
+        user.email = new_email or user.email
+        user.first_name = new_first_name or user.first_name
+        user.last_name = new_last_name or user.last_name
+        user.home_address = new_home_address or user.home_address
+        user.city_town = new_city_town or user.city_town
+        user.state = new_state or user.state
+        user.zip_code = new_zip_code or user.zip_code
+
         db.session.commit()
 
         return jsonify({'success': True, 'message': 'User information updated successfully'})
 
+    except IntegrityError as ie:
+        db.session.rollback()
+        print(f"IntegrityError occurred during user update: {ie}")
+        return jsonify({'success': False, 'message': 'Username, password, or email already exists'}), 400
+
     except Exception as e:
+        db.session.rollback()
         print(f"An error occurred during user update: {e}")
         return jsonify({'success': False, 'message': 'An error occurred during user update'}), 500
 

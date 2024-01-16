@@ -26,7 +26,7 @@
     <h1>Login</h1>
     <!-- Login Form -->
     <div id="login-signup-form">
-        <form id="login-form" action="/login" method="post">
+        <form id="login-form" action="{{ url_for('login') }}" method="post">
             <label for="username">Username</label>
             <input type="text" id="username" name="username" placeholder="Username">
             <label for="password">Password</label>
@@ -38,7 +38,7 @@
 <!-- Signup Section -->
     <h1>Signup</h1>
     <div id="login-signup-form">
-        <form id="signup-form" method="POST" action="/signup">
+        <form id="signup-form" method="POST" action="{{ url_for('signup') }}">
             <label for="create-username">Create Username</label>
             <input type="text" id="create-username" name="username" placeholder="Create Username">
             <label for="create-password">Create Password</label>
